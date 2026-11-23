@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Arked Pintar: 5 game untuk kanak-kanak 8 hingga 10 tahun, setiap satu 10 level.">
+<style>body{margin:0}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}</style>
+<title>Arked Pintar</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;800&display=swap">
+<style>
+/* Layout: one playground column. Name entry, then game cards, then a 10-level map, then the play stage. Single sunny light look by choice. */
+:root{
+  --bg:#dff0ff; --ink:#1c2848; --muted:#56678a; --card:#ffffff; --line:#c6d9f0; --soft:#eef5fd;
+  --sun:#ffc93c; --sun-d:#d39a00; --coral:#ff6b5b; --coral-d:#c94436; --leaf:#2fae66; --leaf-d:#1f7f49;
+  --grape:#6c5ce7; --grape-d:#4b3fc0; --sea:#2d9cdb;
+  --f-d:"Baloo 2","Comic Sans MS",system-ui,sans-serif; --f-b:"Nunito",system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background:var(--bg); color:var(--ink); font-family:var(--f-b); font-size:16px}
+.app{max-width:760px; margin:0 auto; padding-block:14px 32px;
+  padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex; flex-direction:column; gap:16px}
+h1,h2,h3{font-family:var(--f-d); margin:0; line-height:1.1; text-wrap:balance}
+h1{font-size:clamp(1.8rem,6vw,2.5rem)} h2{font-size:clamp(1.4rem,5vw,1.9rem)}
+p{margin:0; line-height:1.5}
+.muted{color:var(--muted)}
+.label{font-size:.78rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+:focus-visible{outline:3px solid var(--grape); outline-offset:3px}
+[hidden]{display:none!important}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.bar{display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between}
+.card{background:var(--card); border:2px solid var(--line); border-radius:20px; padding:16px}
+.btn{font:800 1.05rem var(--f-d); border:0; border-radius:14px; padding:10px 18px; cursor:pointer; background:var(--sun); color:#3a2a00; box-shadow:0 4px 0 var(--sun-d)}
+.btn:active{transform:translateY(3px); box-shadow:0 1px 0 var(--sun-d)}
+.btn.alt{background:var(--card); color:var(--ink); border:2px solid var(--line); box-shadow:0 4px 0 var(--line)}
+.mini{font:800 .85rem var(--f-b); color:var(--ink); background:var(--card); border:2px solid var(--line); border-radius:999px; padding:6px 12px; cursor:pointer}
+.screen{display:flex; flex-direction:column; gap:16px}
+
+.top{display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between}
+.logo{font:800 1.6rem/1 var(--f-d)} .logo b{color:var(--coral)}
+.who{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.who-name{font-weight:800; background:var(--sun); border-radius:999px; padding:6px 12px; color:#3a2a00}
+
+/* Name screen */
+.hero{display:flex; flex-direction:column; gap:14px; padding:22px}
+.floaty{display:flex; gap:10px; font-size:2.2rem}
+.floaty span{display:inline-block; animation:hop 1.6s ease-in-out infinite}
+.floaty span:nth-child(2){animation-delay:.2s} .floaty span:nth-child(3){animation-delay:.4s}
+.floaty span:nth-child(4){animation-delay:.6s} .floaty span:nth-child(5){animation-delay:.8s}
+@keyframes hop{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-10px) rotate(-6deg)}}
+#name-form{display:flex; flex-direction:column; gap:8px}
+#name-form label{font-weight:800}
+#name-in{font:800 1.2rem var(--f-b); padding:10px 14px; border-radius:14px; border:3px solid var(--line); flex:1; min-width:0; color:var(--ink); background:var(--soft)}
+#name-in:focus{border-color:var(--grape); outline:none}
+.err{color:var(--coral-d); font-weight:800; min-height:1.4em; font-size:.92rem}
+.known{display:flex; flex-wrap:wrap; gap:8px}
+
+/* Menu */
+.games{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:14px}
+.gcard{text-align:left; cursor:pointer; color:var(--ink); background:var(--card); border:3px solid var(--line); border-radius:20px; padding:14px;
+  box-shadow:0 5px 0 var(--line); display:flex; flex-direction:column; gap:6px; font-family:var(--f-b)}
+.gcard:hover{border-color:var(--gc)}
+.gcard:active{transform:translateY(3px); box-shadow:0 2px 0 var(--line)}
+.gicon{width:58px; height:58px; border-radius:16px; background:var(--gc); display:flex; align-items:center; justify-content:center; font-size:2rem}
+.gcard:hover .gicon{animation:hop 1s ease-in-out infinite}
+.gcard h3{font-size:1.25rem}
+.gcard p{font-size:.9rem; color:var(--muted)}
+.meter{height:8px; background:var(--soft); border-radius:99px; overflow:hidden}
+.meter i{display:block; height:100%; background:var(--gc)}
+.gmeta{display:flex; justify-content:space-between; font-size:.82rem; font-weight:800}
+
+/* Levels */
+.levels{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px}
+.lv{aspect-ratio:1; border-radius:16px; border:3px solid var(--line); background:var(--card); font:800 1.5rem/1 var(--f-d); color:var(--ink);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; cursor:pointer; box-shadow:0 4px 0 var(--line); padding:4px}
+.lv small{font:800 .72rem var(--f-b); color:var(--sun-d); letter-spacing:1px}
+.lv em{font:700 .66rem var(--f-b); font-style:normal; color:var(--muted)}
+.lv.done{border-color:var(--leaf)}
+.lv.locked{background:var(--soft); color:#9aaccc; cursor:not-allowed; box-shadow:none}
+
+/* Play */
+.hud{display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; justify-content:space-between; font-weight:800}
+.hud .score{background:var(--ink); color:#fff; border-radius:999px; padding:4px 12px; font-variant-numeric:tabular-nums}
+#hud-info{font-variant-numeric:tabular-nums; color:var(--muted)}
+.stage{position:relative; min-height:300px}
+#fx{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:6}
+.cv{display:block; width:100%; max-width:440px; height:auto; margin:0 auto; border-radius:18px; border:3px solid var(--line); touch-action:none; background:#8fdc8a}
+.pad{display:grid; grid-template-columns:repeat(3,64px); grid-template-rows:repeat(2,54px); gap:8px; justify-content:center; margin-top:12px; touch-action:none; user-select:none; -webkit-user-select:none}
+.pad button{border:0; border-radius:14px; background:var(--grape); color:#fff; font:800 1.5rem var(--f-d); box-shadow:0 4px 0 var(--grape-d); cursor:pointer; touch-action:none}
+.pad button.on,.pad button:active{transform:translateY(3px); box-shadow:0 1px 0 var(--grape-d)}
+.pad .u{grid-column:2; grid-row:1} .pad .l{grid-column:1; grid-row:2} .pad .d{grid-column:2; grid-row:2} .pad .r{grid-column:3; grid-row:2}
+
+.quiz{display:flex; flex-direction:column; gap:14px}
+.tbar{height:10px; background:var(--line); border-radius:99px; overflow:hidden}
+.tbar i{display:block; height:100%; width:100%; background:var(--coral); transition:width .1s linear}
+.emo{display:flex; justify-content:center; align-items:center; gap:14px; font-size:clamp(3rem,15vw,5rem); line-height:1.2; padding-block:10px}
+.emo span{display:inline-block; animation:hop 1.3s ease-in-out infinite}
+.emo span:last-child{animation-delay:.35s}
+.emo b{font:800 2rem var(--f-d); color:var(--muted)}
+.opts{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.opts3{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+.opt{position:relative; font:800 1.1rem/1.2 var(--f-d); padding:16px 8px; border-radius:16px; border:3px solid var(--line); background:var(--card); color:var(--ink); cursor:pointer; box-shadow:0 4px 0 var(--line); font-variant-numeric:tabular-nums}
+.opt:hover:not(:disabled){border-color:var(--grape)}
+.opt:active:not(:disabled){transform:translateY(3px); box-shadow:0 1px 0 var(--line)}
+.opt .k{position:absolute; top:4px; left:8px; font:800 .68rem var(--f-b); color:var(--muted)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--leaf); border-color:var(--leaf); color:#fff; box-shadow:0 4px 0 var(--leaf-d)}
+.opt.wrong{background:var(--coral); border-color:var(--coral); color:#fff; box-shadow:0 4px 0 var(--coral-d); animation:shake .35s}
+.opt.right .k,.opt.wrong .k{color:inherit}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.fb{min-height:1.5em; text-align:center; font-weight:800}
+.fb.good{color:var(--leaf-d)} .fb.bad{color:var(--coral-d)}
+
+.stmt{background:var(--card); border:3px solid var(--line); border-radius:20px; padding:22px 16px; text-align:center; min-height:9rem;
+  display:flex; flex-direction:column; justify-content:center; align-items:center; gap:10px; animation:slidein .35s ease-out}
+.stmt p{font:800 clamp(1.25rem,5vw,1.7rem)/1.3 var(--f-d); font-variant-numeric:tabular-nums}
+.tag{font-size:.75rem; font-weight:800; border-radius:999px; padding:3px 10px; background:var(--soft); color:var(--muted)}
+.tag.sains{background:#dff5e9; color:var(--leaf-d)} .tag.mat{background:#ece9ff; color:var(--grape-d)}
+@keyframes slidein{from{transform:translateX(40px) rotate(3deg)}to{transform:none}}
+.bs{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.bs button{font:800 1.5rem var(--f-d); padding:20px 0; border-radius:20px; border:0; cursor:pointer; color:#fff}
+.bs .t{background:var(--leaf); box-shadow:0 6px 0 var(--leaf-d)} .bs .f{background:var(--coral); box-shadow:0 6px 0 var(--coral-d)}
+.bs button:active:not(:disabled){transform:translateY(4px); box-shadow:none}
+.bs button:disabled{opacity:.55; cursor:default}
+.streak{text-align:center; font-weight:800; color:var(--sun-d); min-height:1.4em}
+.streak.pop{animation:popin .4s cubic-bezier(.3,1.6,.5,1)}
+
+.city{display:flex; flex-direction:column; gap:12px}
+.goal{display:flex; flex-wrap:wrap; gap:6px}
+.chip{font-weight:800; font-size:.85rem; background:var(--card); border:2px solid var(--line); border-radius:999px; padding:4px 10px}
+.chip.ok{background:#dff5e9; border-color:var(--leaf); color:var(--leaf-d)}
+.land{position:relative; background:linear-gradient(#bfe6ff 0 26%, #9fdc8f 26%); border-radius:20px; border:2px solid var(--line); padding:58px 14px 44px; overflow:hidden}
+.cloud{position:absolute; top:12px; left:-90px; width:70px; height:22px; background:#fff; border-radius:20px; animation:drift 18s linear infinite}
+.cloud::before{content:""; position:absolute; width:34px; height:30px; background:#fff; border-radius:50%; left:12px; top:-14px}
+.cloud.c2{top:30px; width:50px; height:16px; animation-duration:27s; animation-delay:-12s}
+@keyframes drift{from{left:-90px}to{left:100%}}
+.plots{position:relative; display:grid; grid-template-columns:repeat(var(--n),1fr); gap:8px; max-width:340px; margin:0 auto}
+.plot{aspect-ratio:1; border-radius:12px; border:2px dashed rgba(28,40,72,.28); background:rgba(255,255,255,.35); display:flex; align-items:center; justify-content:center; font-size:clamp(1.6rem,8vw,2.4rem)}
+.plot.built{border:2px solid transparent; background:rgba(255,255,255,.65)}
+.plot.built span{display:inline-block; animation:popin .55s cubic-bezier(.3,1.6,.5,1)}
+@keyframes popin{from{transform:scale(0) translateY(16px)}to{transform:none}}
+.street{position:absolute; left:0; right:0; bottom:0; height:30px; background:#6b7280}
+.street::before{content:""; position:absolute; left:0; right:0; top:14px; border-top:2px dashed #e5e7eb}
+.car{position:absolute; bottom:3px; left:-40px; font-size:1.3rem; animation:drive 8s linear infinite; transform:scaleX(-1)}
+.car.c2{animation-duration:12s; animation-delay:-5s}
+@keyframes drive{from{left:-40px}to{left:100%}}
+.cq{display:flex; flex-direction:column; gap:10px; position:relative}
+.cq-q{font:800 clamp(1.8rem,8vw,2.4rem)/1 var(--f-d); text-align:center; font-variant-numeric:tabular-nums}
+.coinfly{position:absolute; right:16px; top:10px; font:800 1.1rem var(--f-d); color:var(--sun-d); animation:fly 1s ease-out forwards; pointer-events:none}
+@keyframes fly{from{transform:translateY(0)}to{transform:translateY(-40px); opacity:0}}
+.shop{display:grid; grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); gap:8px; margin-top:6px}
+.buy{display:flex; flex-direction:column; align-items:center; gap:2px; padding:10px 6px; border-radius:16px; border:3px solid var(--line); background:var(--card); color:var(--ink); cursor:pointer; font:800 .9rem var(--f-b); box-shadow:0 4px 0 var(--line)}
+.buy .be{font-size:1.8rem}
+.buy small{font-size:.75rem; color:var(--sun-d)}
+.buy:hover:not(:disabled){border-color:var(--sun)}
+.buy:disabled{opacity:.5; cursor:default; box-shadow:none}
+
+.result{position:absolute; inset:0; z-index:5; display:flex; align-items:center; justify-content:center; padding:16px; background:rgba(223,240,255,.9); border-radius:20px}
+.rcard{text-align:center; width:100%; max-width:360px; display:flex; flex-direction:column; gap:10px; align-items:center; animation:popin .45s cubic-bezier(.3,1.5,.5,1)}
+.bigstars{font-size:2.6rem; letter-spacing:6px; color:var(--sun)} .bigstars .off{color:#cfdbea}
+.rscore{font:800 2rem/1 var(--f-d); font-variant-numeric:tabular-nums}
+.rcard .row{justify-content:center}
+
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse; width:100%; min-width:520px; font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px; text-align:right; border-bottom:2px solid var(--soft); white-space:nowrap}
+th:nth-child(-n+2),td:nth-child(-n+2){text-align:left}
+th{font-size:.78rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em}
+tr.me td{background:#fff6d6; font-weight:800}
+td.total{font-weight:800}
+@media (max-width:480px){ .lv{font-size:1.2rem; border-radius:12px} .lv em{display:none} .opt{padding:14px 6px; font-size:1rem} }
+@media (prefers-reduced-motion:reduce){ *{animation:none!important; transition:none!important} }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="top">
+    <div class="logo">Arked <b>Pintar</b></div>
+    <div class="who" id="who" hidden>
+      <span class="who-name" id="who-name"></span>
+      <button class="mini" id="btn-board" type="button">Papan markah</button>
+      <button class="mini" id="btn-music" type="button" aria-pressed="true">Muzik: Hidup</button>
+      <button class="mini" id="btn-mute" type="button" aria-pressed="false">Bunyi: Hidup</button>
+    </div>
+  </header>
+
+  <section class="screen" id="s-name">
+    <div class="card hero">
+      <div class="floaty" aria-hidden="true"><span>⭐</span><span>🤔</span><span>⚡</span><span>🐢</span><span>🏙️</span></div>
+      <h1>Selamat datang ke Arked Pintar!</h1>
+      <p class="muted">Ada 5 game, setiap satu ada 10 level. Tulis nama kamu dulu supaya markah kamu disimpan.</p>
+      <form id="name-form" novalidate>
+        <label for="name-in">Nama pemain</label>
+        <div class="row"><input id="name-in" maxlength="12" autocomplete="off" placeholder="Contoh: Aisyah"><button class="btn" type="submit">Jom main</button></div>
+        <p class="err" id="name-err" aria-live="polite"></p>
+      </form>
+      <div id="known-wrap" hidden><div class="label">Atau pilih pemain lama</div><div class="known" id="known"></div></div>
+    </div>
+  </section>
+
+  <section class="screen" id="s-menu" hidden>
+    <div class="bar"><h2 id="menu-hi">Hai!</h2><button class="mini" id="btn-switch" type="button">Tukar pemain</button></div>
+    <p class="muted" id="menu-total"></p>
+    <div class="games" id="games"></div>
+  </section>
+
+  <section class="screen" id="s-levels" hidden>
+    <div class="bar"><button class="mini" id="lv-back" type="button">← Semua game</button><span class="label" id="lv-sum"></span></div>
+    <h2 id="lv-title"></h2>
+    <p class="muted" id="lv-how"></p>
+    <div class="levels" id="levels"></div>
+  </section>
+
+  <section class="screen" id="s-play" hidden>
+    <div class="hud">
+      <span id="hud-level"></span>
+      <span class="score" id="hud-score">Markah 0</span>
+      <span id="hud-info"></span>
+      <button class="mini" id="quit" type="button">Keluar</button>
+    </div>
+    <div class="stage">
+      <div id="area"></div>
+      <canvas id="fx" aria-hidden="true"></canvas>
+      <div class="result" id="result" hidden>
+        <div class="card rcard">
+          <h2 id="r-title"></h2>
+          <div class="bigstars" id="r-stars"></div>
+          <div class="rscore" id="r-score"></div>
+          <p class="muted" id="r-note"></p>
+          <div class="row">
+            <button class="btn" id="r-next" type="button">Level seterusnya</button>
+            <button class="btn alt" id="r-retry" type="button">Main semula</button>
+            <button class="btn alt" id="r-levels" type="button">Pilih level</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="s-board" hidden>
+    <div class="bar"><button class="mini" id="bd-back" type="button">← Kembali</button></div>
+    <h2>Papan markah</h2>
+    <p class="muted">Markah terbaik setiap level dicampur. Disimpan dalam peranti ini sahaja.</p>
+    <div class="card tablewrap"><table><thead id="bd-head"></thead><tbody id="bd-body"></tbody></table></div>
+  </section>
+</div>
+
+<script>
+// PURE-START
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
+const shuffle=arr=>{for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr};
+const add=(a,b)=>({q:`${a} + ${b}`,a:a+b,near:[a+b+10,a+b-10]});
+const sub=(a,b)=>({q:`${a} − ${b}`,a:a-b,near:[a-b+10,a+b]});
+const mul=(a,b)=>({q:`${a} × ${b}`,a:a*b,near:[a*(b+1),a*(b-1),(a+1)*b]});
+const div=(b,ans)=>({q:`${b*ans} ÷ ${b}`,a:ans,near:[ans+1,ans-1,b]});
+const MATH={
+  8:[()=>add(rnd(5,40),rnd(2,30)), ()=>{const a=rnd(10,50);return sub(a,rnd(1,a))}, ()=>mul(rnd(2,5),rnd(1,10))],
+  9:[()=>{const a=rnd(20,90);return add(a,rnd(5,100-a))}, ()=>{const a=rnd(30,100);return sub(a,rnd(5,a))}, ()=>mul(rnd(2,9),rnd(2,10)), ()=>div(rnd(2,5),rnd(2,10))],
+  10:[()=>add(rnd(100,600),rnd(50,399)), ()=>{const a=rnd(200,999);return sub(a,rnd(50,a))}, ()=>mul(rnd(3,12),rnd(3,12)), ()=>div(rnd(2,12),rnd(2,12))]
+};
+const mathTier=L=>L<=3?8:L<=7?9:10;
+function mathQ(tier){
+  const g=pick(MATH[tier])(); const opts=new Set([g.a]);
+  for(const v of shuffle(g.near.slice())) if(opts.size<4&&v>=0) opts.add(v);
+  while(opts.size<4){const v=g.a+pick([1,2,3,10,-1,-2,-3,-10])*rnd(1,2); if(v>=0) opts.add(v)}
+  return {q:g.q,a:g.a,near:g.near,opts:shuffle([...opts])};
+}
+// 3 puzzles per level, easy to hard (idioms at the end)
+const EMOJI=[
+  ['🐝','🍯','Lebah madu'],['🐄','🥛','Susu lembu'],['🐔','🥚','Telur ayam'],
+  ['🌧️','☂️','Payung hujan'],['🦷','🪥','Berus gigi'],['🌳','🍎','Pokok epal'],
+  ['☀️','🌻','Bunga matahari'],['❄️','⛄','Orang salji'],['🥥','🌴','Pokok kelapa'],
+  ['🍌','🔥','Pisang goreng'],['🍞','🧈','Roti mentega'],['🌙','🍰','Kuih bulan'],
+  ['🕷️','🕸️','Sarang labah-labah'],['🌋','🔥','Gunung berapi'],['👁️','👓','Cermin mata'],
+  ['⭐','🌊','Bintang laut'],['🐠','🏠','Akuarium'],['🌊','🏄','Luncur ombak'],
+  ['🦁','👑','Raja hutan'],['🐸','👑','Putera katak'],['🚀','🌌','Angkasa lepas'],
+  ['🐢','🐇','Arnab dan kura-kura'],['🐍','🪜','Ular tangga'],['🔥','🚒','Bomba'],
+  ['🌶️','🦐','Sambal udang'],['🍵','🥛','Teh tarik'],['🧊','🥜','Ais kacang'],
+  ['📖','🐛','Ulat buku'],['🐊','😢','Air mata buaya'],['🐘','🦷','Gading gajah']
+];
+function emojiLevel(L){
+  return EMOJI.slice((L-1)*3,L*3).map(([e1,e2,a])=>({e:[e1,e2],a,
+    opts:shuffle([a,...shuffle(EMOJI.filter(x=>x[2]!==a)).slice(0,3).map(x=>x[2])])}));
+}
+// 3 facts per level, easy to hard. true = Betul
+const FACTS=[
+  ['Ikan bernafas menggunakan insang.',true],['Lembu bertelur.',false],['Matahari terbit di sebelah timur.',true],
+  ['Labah-labah mempunyai 6 kaki.',false],['Air yang sangat sejuk akan membeku menjadi ais.',true],['Kucing ialah haiwan mamalia.',true],
+  ['Bulan mengeluarkan cahayanya sendiri.',false],['Pokok memerlukan cahaya matahari untuk membuat makanan.',true],['Penguin boleh terbang tinggi di langit.',false],
+  ['Seminggu ada 7 hari.',true],['Ikan paus ialah sejenis ikan.',false],['Jantung mengepam darah ke seluruh badan.',true],
+  ['Bumi berbentuk leper seperti meja.',false],['Rama-rama berasal daripada ulat beluncas.',true],['Setahun ada 12 bulan.',true],
+  ['Magnet boleh menarik kayu.',false],['Katak ialah haiwan amfibia.',true],['Gunung Kinabalu terletak di Sabah.',true],
+  ['Bunyi bergerak lebih laju daripada cahaya.',false],['Badan manusia dewasa ada 206 tulang.',true],['Ular ialah haiwan mamalia.',false],
+  ['Marikh digelar Planet Merah.',true],['Air mendidih pada suhu 50°C.',false],['Ibu negara Malaysia ialah Kuala Lumpur.',true],
+  ['Lebah membuat madu daripada nektar bunga.',true],['Musytari ialah planet paling kecil.',false],['Tumbuhan menyerap karbon dioksida.',true],
+  ['Kelawar ialah sejenis burung.',false],['Otak mengawal seluruh badan kita.',true],['Cahaya matahari mengambil masa kira-kira 8 minit untuk sampai ke Bumi.',true]
+];
+function bsLevel(L){
+  const items=FACTS.slice((L-1)*3,L*3).map(([t,v])=>({t,v,tag:'Sains'}));
+  for(let i=0;i<3;i++){
+    const m=mathQ(mathTier(L)), truth=Math.random()<.5;
+    let shown=m.a;
+    if(!truth){const bad=m.near.filter(v=>v>=0&&v!==m.a); shown=bad.length?pick(bad):m.a+pick([1,2,10])}
+    items.push({t:`${m.q} = ${shown}`,v:truth,tag:'Matematik'});
+  }
+  return shuffle(items);
+}
+const BUILD={
+  rumah:{e:'🏠',n:'Rumah',c:20}, pokok:{e:'🌳',n:'Pokok',c:10}, kedai:{e:'🏪',n:'Kedai',c:30},
+  taman:{e:'🎡',n:'Taman',c:40}, sekolah:{e:'🏫',n:'Sekolah',c:50}, hospital:{e:'🏥',n:'Hospital',c:60}
+};
+const CITY_GOALS=[
+  {rumah:1,pokok:1},{rumah:2,pokok:1},{rumah:2,kedai:1},{rumah:3,pokok:2},
+  {rumah:3,kedai:1,sekolah:1},{rumah:4,pokok:2,taman:1},{rumah:4,kedai:2,sekolah:1},
+  {rumah:5,pokok:2,hospital:1},{rumah:5,kedai:2,taman:1,sekolah:1},{rumah:6,kedai:2,sekolah:1,hospital:1,taman:1}
+];
+const cityGrid=L=>L<=4?3:4;
+const cityCoins=L=>10+2*L;
+// rows 1..9 between start (bottom) and goal (top)
+function laneSpec(L){
+  const s=[];
+  for(let r=1;r<=9;r++){
+    if(r===5) s.push('grass');
+    else if(r<5) s.push(L>=5?'river':L>=3?(r<=2?'river':'road'):(r%2?'road':'grass'));
+    else s.push(L===1&&r===7?'grass':'road');
+  }
+  return s;
+}
+// PURE-END
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const KEYS={ArrowUp:'u',ArrowDown:'d',ArrowLeft:'l',ArrowRight:'r',w:'u',s:'d',a:'l',d:'r',W:'u',S:'d',A:'l',D:'r'};
+
+/* ---------- storage ---------- */
+const DKEY='arked-pintar-v1';
+let db; try{db=JSON.parse(localStorage.getItem(DKEY))}catch(e){}
+if(!db||!db.players) db={players:{},last:''};
+const save=()=>{try{localStorage.setItem(DKEY,JSON.stringify(db))}catch(e){}};
+let player='';
+function prog(gid){const p=db.players[player]; p[gid]=p[gid]||Array(10).fill(null); return p[gid]}
+const gameTotal=(name,gid)=>((db.players[name]||{})[gid]||[]).reduce((s,r)=>s+(r?r.s:0),0);
+
+/* ---------- sound ---------- */
+let muted=false, ac=null; try{muted=localStorage.getItem('arked-muted')==='1'}catch(e){}
+function tone(f,d=.15,type='sine',when=0){
+  if(muted) return;
+  try{
+    ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+    const o=ac.createOscillator(), g=ac.createGain(), t=ac.currentTime+when;
+    o.type=type; o.frequency.value=f; g.gain.setValueAtTime(.16,t); g.gain.exponentialRampToValueAtTime(.001,t+d);
+    o.connect(g).connect(ac.destination); o.start(t); o.stop(t+d);
+  }catch(e){}
+}
+const ding=()=>{tone(660);tone(990,.18,'sine',.08)}, buzz=()=>tone(180,.35,'triangle');
+const fanfare=()=>[523,659,784,1047].forEach((f,i)=>tone(f,.22,'sine',i*.11));
+function renderMute(){const b=$('#btn-mute'); b.textContent='Bunyi: '+(muted?'Mati':'Hidup'); b.setAttribute('aria-pressed',String(muted))}
+$('#btn-mute').onclick=()=>{muted=!muted; try{localStorage.setItem('arked-muted',muted?'1':'0')}catch(e){} renderMute(); if(muted&&'speechSynthesis' in window) speechSynthesis.cancel()};
+// every button press gets a soft pop
+document.addEventListener('click',e=>{if(e.target.closest('button')) tone(740,.06,'triangle')},true);
+
+/* background music: a cheerful 32-step loop synthesized with WebAudio (no audio files allowed in the page) */
+const MUSIC_VOL=.07, BEAT=.2;
+const MEL=[72,76,79,76, 77,81,79,null, 76,79,84,79, 77,76,74,null, 72,76,79,76, 77,81,79,77, 76,74,72,74, 76,null,72,null];
+const BASS=[48,48,53,53,52,52,50,55, 48,48,53,53,55,55,48,48];
+let musicOn=true, mGain=null, mTimer=null, mStep=0, mNext=0;
+try{musicOn=localStorage.getItem('arked-music')!=='0'}catch(e){}
+const hz=m=>440*Math.pow(2,(m-69)/12);
+function mNote(f,t,d,type,v){const o=ac.createOscillator(),g=ac.createGain(); o.type=type; o.frequency.value=f; g.gain.setValueAtTime(v,t); g.gain.exponentialRampToValueAtTime(.001,t+d); o.connect(g).connect(mGain); o.start(t); o.stop(t+d)}
+function mSchedule(){
+  while(mNext<ac.currentTime+.25){
+    const m=MEL[mStep]; if(m!=null) mNote(hz(m),mNext,BEAT*.9,'triangle',.7);
+    if(mStep%2===0) mNote(hz(BASS[mStep/2]),mNext,BEAT*1.8,'sine',1);
+    mNext+=BEAT; mStep=(mStep+1)%MEL.length;
+  }
+}
+function startMusic(){
+  if(!musicOn||mTimer) return;
+  try{
+    ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+    if(ac.state==='suspended') ac.resume();
+    if(!mGain){mGain=ac.createGain(); mGain.gain.value=MUSIC_VOL; mGain.connect(ac.destination)}
+    mNext=ac.currentTime+.05; mTimer=setInterval(mSchedule,60);
+  }catch(e){}
+}
+function stopMusic(){clearInterval(mTimer); mTimer=null}
+function renderMusic(){const b=$('#btn-music'); b.textContent='Muzik: '+(musicOn?'Hidup':'Mati'); b.setAttribute('aria-pressed',String(musicOn))}
+$('#btn-music').onclick=()=>{musicOn=!musicOn; try{localStorage.setItem('arked-music',musicOn?'1':'0')}catch(e){} musicOn?startMusic():stopMusic(); renderMusic()};
+// browsers only allow sound after the first tap or key press
+['pointerdown','keydown'].forEach(ev=>document.addEventListener(ev,startMusic));
+document.addEventListener('visibilitychange',()=>{if(ac) document.hidden?ac.suspend():ac.resume()});
+renderMusic();
+
+/* spoken voice lines (device text-to-speech; silently skipped where unavailable) */
+function say(text,pitch){
+  if(muted||!('speechSynthesis' in window)) return;
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text); u.lang='en-US'; u.pitch=pitch; u.rate=1;
+    const v=speechSynthesis.getVoices().find(v=>/^en/i.test(v.lang)); if(v) u.voice=v;
+    if(mGain) mGain.gain.value=.015; // duck the music while talking
+    u.onend=u.onerror=()=>{if(mGain) mGain.gain.value=MUSIC_VOL};
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+if('speechSynthesis' in window) speechSynthesis.getVoices(); // warm up the voice list
+
+/* ---------- helpers for games ---------- */
+function timers(){let ids=[];return{every(f,ms){ids.push(setInterval(f,ms))},after(f,ms){ids.push(setTimeout(f,ms))},clear(){ids.forEach(id=>{clearInterval(id);clearTimeout(id)});ids=[]}}}
+function makeCanvas(area,w,h){
+  const c=document.createElement('canvas'), dpr=Math.min(2,window.devicePixelRatio||1);
+  c.width=w*dpr; c.height=h*dpr; c.className='cv'; c.setAttribute('role','img'); c.setAttribute('aria-label','Kawasan permainan');
+  area.append(c); const x=c.getContext('2d'); x.scale(dpr,dpr); return x;
+}
+function loop(fn){let id,last=performance.now();const f=t=>{const dt=Math.min(.05,(t-last)/1000);last=t;fn(dt,t/1000);id=requestAnimationFrame(f)};id=requestAnimationFrame(f);return()=>cancelAnimationFrame(id)}
+function rr(x,X,Y,w,h,r){x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+w,Y,X+w,Y+h,r);x.arcTo(X+w,Y+h,X,Y+h,r);x.arcTo(X,Y+h,X,Y,r);x.arcTo(X,Y,X+w,Y,r);x.closePath()}
+function drawStar(x,cx,cy,r,rot,fill,stroke){
+  x.beginPath();
+  for(let i=0;i<10;i++){const a=rot+i*Math.PI/5-Math.PI/2, rad=i%2?r*.45:r; x.lineTo(cx+Math.cos(a)*rad,cy+Math.sin(a)*rad)}
+  x.closePath(); x.fillStyle=fill; x.fill(); x.lineWidth=2; x.strokeStyle=stroke; x.stroke();
+}
+function pad(area,mode,cb){
+  const el=document.createElement('div'); el.className='pad';
+  el.innerHTML=[['u','↑','Atas'],['l','←','Kiri'],['d','↓','Bawah'],['r','→','Kanan']].map(([d,s,n])=>`<button type="button" class="${d}" data-d="${d}" aria-label="${n}">${s}</button>`).join('');
+  area.append(el);
+  el.querySelectorAll('button').forEach(b=>{
+    const d=b.dataset.d;
+    b.addEventListener('pointerdown',e=>{e.preventDefault(); b.classList.add('on'); cb(d,true)});
+    const up=()=>{if(b.classList.contains('on')){b.classList.remove('on'); if(mode==='hold') cb(d,false)}};
+    b.addEventListener('pointerup',up); b.addEventListener('pointerleave',up); b.addEventListener('pointercancel',up);
+    b.addEventListener('click',e=>{if(e.detail===0) cb(d,true)}); // keyboard activation
+  });
+}
+const hearts=n=>'♥'.repeat(n)+'♡'.repeat(3-n);
+
+/* ---------- game 1: Misi Kutip Bintang ---------- */
+function gameBintang(area,L,api){
+  const W=360,H=440,x=makeCanvas(area,W,H), held={u:0,d:0,l:0,r:0};
+  pad(area,'hold',(d,on)=>held[d]=on?1:0);
+  api.key((e,down)=>{const d=KEYS[e.key]; if(!d) return false; held[d]=down?1:0; return true});
+  const p={x:W/2,y:H-34,r:14,face:1}, rocks=[], stars=[], foes=[], parts=[];
+  const nR=L>=2?Math.floor(L/2)+1:0;
+  for(let t=0;rocks.length<nR&&t<400;t++){
+    const k={x:rnd(16,W-76),y:rnd(50,H-130),w:rnd(34,60),h:rnd(26,48)};
+    if(!rocks.some(o=>k.x<o.x+o.w+34&&k.x+k.w+34>o.x&&k.y<o.y+o.h+34&&k.y+k.h+34>o.y)) rocks.push(k);
+  }
+  const inRock=(cx,cy,r)=>rocks.some(k=>cx+r>k.x&&cx-r<k.x+k.w&&cy+r>k.y&&cy-r<k.y+k.h);
+  for(let t=0;stars.length<4+L&&t<900;t++){
+    const cx=rnd(24,W-24),cy=rnd(24,H-70);
+    if(!inRock(cx,cy,18)&&!stars.some(s=>Math.hypot(s.x-cx,s.y-cy)<44)) stars.push({x:cx,y:cy,ph:Math.random()*6,got:0});
+  }
+  const sp=55+L*12;
+  for(let t=0;foes.length<Math.ceil(L/2)&&t<900;t++){
+    const cx=rnd(30,W-30),cy=rnd(30,H*.55);
+    if(!inRock(cx,cy,18)&&Math.hypot(cx-p.x,cy-p.y)>180){const a=(rnd(20,70)+pick([0,90,180,270]))*Math.PI/180; foes.push({x:cx,y:cy,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,ph:Math.random()*6})}
+  }
+  const tufts=Array.from({length:46},(_,i)=>[(i*97+13)%W,(i*61+29)%H]);
+  let lives=3,time=60,inv=0,done=false,got=0,moving=false;
+  const burst=(bx,by,c)=>{for(let i=0;i<14;i++){const a=Math.random()*6.28,s=rnd(60,180);parts.push({x:bx,y:by,vx:Math.cos(a)*s,vy:Math.sin(a)*s-60,life:.7,c})}};
+  function step(dt){
+    let dx=held.r-held.l, dy=held.d-held.u; const m=Math.hypot(dx,dy); moving=m>0;
+    if(m){dx/=m; dy/=m; if(dx) p.face=Math.sign(dx);
+      const nx=Math.max(p.r,Math.min(W-p.r,p.x+dx*160*dt)); if(!inRock(nx,p.y,p.r-2)) p.x=nx;
+      const ny=Math.max(p.r,Math.min(H-p.r,p.y+dy*160*dt)); if(!inRock(p.x,ny,p.r-2)) p.y=ny;}
+    for(const f of foes){
+      const nx=f.x+f.vx*dt; if(nx<14||nx>W-14||inRock(nx,f.y,14)) f.vx*=-1; else f.x=nx;
+      const ny=f.y+f.vy*dt; if(ny<14||ny>H-14||inRock(f.x,ny,14)) f.vy*=-1; else f.y=ny;
+      if(inv<=0&&Math.hypot(f.x-p.x,f.y-p.y)<p.r+13){
+        lives--; inv=1.6; buzz(); burst(p.x,p.y,'#ff6b5b');
+        if(lives<=0){done=true; api.end(false,0); return}
+      }
+    }
+    for(const s of stars) if(!s.got&&Math.hypot(s.x-p.x,s.y-p.y)<p.r+13){s.got=1; got++; api.add(10); ding(); burst(s.x,s.y,'#ffc93c')}
+    inv=Math.max(0,inv-dt); time-=dt;
+    if(got===stars.length){done=true; api.add(2*Math.ceil(time)); api.end(true,lives)}
+    else if(time<=0){time=0; done=true; api.end(false,0)}
+  }
+  function draw(t){
+    x.fillStyle='#8fdc8a'; x.fillRect(0,0,W,H);
+    x.fillStyle='#78c873'; for(const [gx,gy] of tufts){x.fillRect(gx,gy,3,8); x.fillRect(gx+5,gy+2,3,6)}
+    for(const k of rocks){x.fillStyle='#8a8f9c'; rr(x,k.x,k.y,k.w,k.h,10); x.fill(); x.fillStyle='#a9aebb'; rr(x,k.x+5,k.y+4,k.w-14,k.h*.4,6); x.fill()}
+    for(const s of stars) if(!s.got) drawStar(x,s.x,s.y+Math.sin(t*3+s.ph)*3,12*(1+Math.sin(t*4+s.ph)*.12),t*1.4+s.ph,'#ffd23f','#d39a00');
+    for(const f of foes){
+      x.fillStyle='#8e6cf0'; x.beginPath();
+      for(let k=0;k<=18;k++){const a=k/18*6.283,rad=14+Math.sin(t*7+k*1.7+f.ph)*2; x.lineTo(f.x+Math.cos(a)*rad,f.y+Math.sin(a)*rad)}
+      x.fill();
+      const ang=Math.atan2(p.y-f.y,p.x-f.x);
+      for(const o of [-5,5]){x.fillStyle='#fff'; x.beginPath(); x.arc(f.x+o,f.y-3,4.5,0,7); x.fill();
+        x.fillStyle='#1c2848'; x.beginPath(); x.arc(f.x+o+Math.cos(ang)*2,f.y-3+Math.sin(ang)*2,2.2,0,7); x.fill()}
+    }
+    if(!(inv>0&&Math.floor(t*12)%2)){
+      const sq=moving?1+Math.sin(t*16)*.12:1+Math.sin(t*3)*.04;
+      x.fillStyle='rgba(0,0,0,.15)'; x.beginPath(); x.ellipse(p.x,p.y+p.r,p.r,4,0,0,7); x.fill();
+      x.save(); x.translate(p.x,p.y-(moving?Math.abs(Math.sin(t*16))*3:0)); x.scale(2-sq,sq);
+      x.fillStyle='#ffb347'; x.beginPath(); x.arc(0,0,p.r,0,7); x.fill(); x.lineWidth=2; x.strokeStyle='#d9822b'; x.stroke();
+      x.fillStyle='#fff'; for(const o of [-5,5]){x.beginPath(); x.arc(o+p.face*2,-3,4,0,7); x.fill()}
+      x.fillStyle='#1c2848'; for(const o of [-5,5]){x.beginPath(); x.arc(o+p.face*3.5,-3,2,0,7); x.fill()}
+      x.strokeStyle='#1c2848'; x.lineWidth=2; x.beginPath(); x.arc(p.face*2,3,5,.2,Math.PI-.2); x.stroke();
+      x.restore();
+    }
+    for(const q of parts){x.globalAlpha=Math.max(0,q.life/.7); x.fillStyle=q.c; x.beginPath(); x.arc(q.x,q.y,3,0,7); x.fill()} x.globalAlpha=1;
+  }
+  const stop=loop((dt,t)=>{
+    if(!done) step(dt);
+    for(const q of parts){q.x+=q.vx*dt; q.y+=q.vy*dt; q.vy+=300*dt; q.life-=dt}
+    for(let i=parts.length-1;i>=0;i--) if(parts[i].life<=0) parts.splice(i,1);
+    api.info(`Nyawa ${hearts(Math.max(0,lives))} · Masa ${Math.ceil(time)} · Bintang ${got}/${stars.length}`);
+    draw(t);
+  });
+  return stop;
+}
+
+/* ---------- game 2: Teka Teka Emoji ---------- */
+function gameEmoji(area,L,api){
+  const qs=emojiLevel(L), tm=timers(), tMax=Math.max(8,22-L*1.4);
+  area.innerHTML=`<div class="quiz"><div class="tbar"><i></i></div><div class="emo"></div><div class="opts"></div><p class="fb" aria-live="polite"></p></div>`;
+  const tb=area.querySelector('.tbar i'), emo=area.querySelector('.emo'), eo=area.querySelector('.opts'), fb=area.querySelector('.fb');
+  let i=0, ok=0, left=0, lock=false;
+  const info=()=>api.info(`Teka ${Math.min(i+1,3)}/3 · Betul ${ok}`);
+  function ask(){
+    const q=qs[i]; lock=false; left=tMax; fb.textContent=''; fb.className='fb'; info();
+    emo.innerHTML=q.e.map(s=>`<span>${s}</span>`).join('<b>+</b>');
+    eo.innerHTML=q.opts.map((o,k)=>`<button class="opt" type="button" data-o="${o}"><span class="k">${k+1}</span>${o}</button>`).join('');
+    tm.clear(); tm.every(()=>{left-=.1; tb.style.width=Math.max(0,left/tMax*100)+'%'; if(left<=0) choose(null)},100);
+  }
+  function choose(btn){
+    if(lock) return; lock=true; tm.clear();
+    const q=qs[i], good=!!btn&&btn.dataset.o===q.a;
+    eo.querySelectorAll('.opt').forEach(b=>{b.disabled=true; if(b.dataset.o===q.a) b.classList.add('right')});
+    if(good){ok++; const pts=10+Math.ceil(left); api.add(pts); fb.textContent=`Betul! +${pts} markah`; fb.className='fb good'; ding()}
+    else{if(btn) btn.classList.add('wrong'); fb.textContent=(btn?'Jawapannya: ':'Masa tamat! Jawapannya: ')+q.a; fb.className='fb bad'; buzz()}
+    info();
+    tm.after(()=>{i++; if(i<qs.length) ask(); else api.end(ok>=2,ok)},1500);
+  }
+  eo.onclick=e=>{const b=e.target.closest('.opt'); if(b) choose(b)};
+  api.key((e,down)=>{const k='1234'.indexOf(e.key); if(k<0) return false; if(down){const b=eo.querySelectorAll('.opt')[k]; if(b) choose(b)} return true});
+  ask();
+  return tm.clear;
+}
+
+/* ---------- game 3: Betul atau Salah ---------- */
+function gameBS(area,L,api){
+  const qs=bsLevel(L), tm=timers(), tMax=Math.max(4,11-L*.7);
+  area.innerHTML=`<div class="quiz"><div class="tbar"><i></i></div><div class="stmt"></div><div class="streak" aria-live="polite"></div>
+    <div class="bs"><button class="t" type="button" data-v="1">✓ Betul</button><button class="f" type="button" data-v="0">✗ Salah</button></div><p class="fb" aria-live="polite"></p></div>`;
+  const tb=area.querySelector('.tbar i'), st=area.querySelector('.stmt'), sk=area.querySelector('.streak'), fb=area.querySelector('.fb'), btns=area.querySelectorAll('.bs button');
+  let i=0, ok=0, streak=0, left=0, lock=false;
+  const info=()=>api.info(`Soalan ${Math.min(i+1,6)}/6 · Betul ${ok}`);
+  function ask(){
+    const q=qs[i]; lock=false; left=tMax; fb.textContent=''; fb.className='fb'; info();
+    st.innerHTML=`<span class="tag ${q.tag==='Sains'?'sains':'mat'}">${q.tag}</span><p>${q.t}</p>`;
+    st.style.animation='none'; void st.offsetWidth; st.style.animation='';
+    btns.forEach(b=>b.disabled=false);
+    tm.clear(); tm.every(()=>{left-=.1; tb.style.width=Math.max(0,left/tMax*100)+'%'; if(left<=0) choose(null)},100);
+  }
+  function choose(v){
+    if(lock) return; lock=true; tm.clear(); btns.forEach(b=>b.disabled=true);
+    const q=qs[i], good=v!==null&&v===q.v;
+    if(good){ok++; streak++; const pts=10+Math.ceil(left)+(streak>1?streak*2:0); api.add(pts); fb.textContent=`Betul! +${pts} markah`; fb.className='fb good'; ding()}
+    else{streak=0; fb.textContent=(v===null?'Masa tamat! ':'Alamak! ')+'Jawapannya: '+(q.v?'Betul':'Salah'); fb.className='fb bad'; buzz()}
+    sk.textContent=streak>1?`${streak} kali berturut-turut!`:''; sk.classList.remove('pop'); void sk.offsetWidth; if(streak>1) sk.classList.add('pop');
+    info();
+    tm.after(()=>{i++; if(i<qs.length) ask(); else api.end(ok>=4,Math.max(0,ok-3))},1400);
+  }
+  btns.forEach(b=>b.onclick=()=>choose(b.dataset.v==='1'));
+  api.key((e,down)=>{
+    const v=e.key==='1'||e.key==='b'||e.key==='B'||e.key==='ArrowLeft'?true:e.key==='2'||e.key==='s'||e.key==='S'||e.key==='ArrowRight'?false:null;
+    if(v===null) return false; if(down) choose(v); return true;
+  });
+  ask();
+  return tm.clear;
+}
+
+/* ---------- game 4: Lari Selamatkan Haiwan ---------- */
+const CAR_COLORS=['#ff6b5b','#2d9cdb','#ffc93c','#6c5ce7','#ff8fb1'];
+function gameHaiwan(area,L,api){
+  const C=9,R=11,T=40,W=C*T,H=R*T,x=makeCanvas(area,W,H), spec=['grass',...laneSpec(L),'grass'], LT=W+4*T;
+  const lanes=spec.map((type,r)=>{
+    if(type==='grass') return {type,sp:0,objs:[]};
+    const river=type==='river', dir=r%2?1:-1, sp=((river?26+L*4:40+L*7)+rnd(0,14))*dir, n=river?3:L<6?2:rnd(2,3), objs=[];
+    for(let i=0;i<n;i++) objs.push({x:-4*T+i*(LT/n)+rnd(0,T/2),w:T*(river?rnd(2,3):rnd(1,2)),c:pick(CAR_COLORS)});
+    return {type,sp,objs};
+  });
+  const cy=r=>r*T+T/2, a={x:4*T+T/2,row:10,hop:0,fx:0,fy:0,tx:0,nr:10,dir:'u'};
+  const need=1+Math.floor((L-1)/4);
+  let lives=3,saves=0,best=10,time=40+need*20,done=false,flash=0,msg='',msgT=0;
+  const apples=[]; while(apples.length<3){const r=rnd(1,9),c=rnd(0,C-1); if(spec[r]!=='river'&&!apples.some(q=>q.r===r&&q.c===c)) apples.push({r,c,got:0})}
+  const parts=[], burst=(bx,by,col)=>{for(let i=0;i<16;i++){const g=Math.random()*6.28,s=rnd(60,180);parts.push({x:bx,y:by,vx:Math.cos(g)*s,vy:Math.sin(g)*s-60,life:.7,c:col})}};
+  function move(d){
+    if(done||a.hop>0) return;
+    let nx=a.x, nr=a.row;
+    if(d==='u') nr--; if(d==='d') nr++; if(d==='l') nx-=T; if(d==='r') nx+=T;
+    if(nr<0||nr>10) return;
+    nx=Math.max(T/2,Math.min(W-T/2,nx));
+    Object.assign(a,{fx:a.x,fy:cy(a.row),tx:nx,nr,dir:d,hop:.001}); tone(520,.05,'square');
+  }
+  pad(area,'tap',d=>move(d));
+  api.key((e,down)=>{const d=KEYS[e.key]; if(!d) return false; if(down&&!e.repeat) move(d); return true});
+  const reset=()=>{a.x=4*T+T/2; a.row=10; a.hop=0};
+  function die(text){lives--; flash=.5; msg=text; msgT=1.4; buzz(); burst(a.x,cy(a.row),'#ff6b5b'); if(lives<=0){done=true; api.end(false,0)} else reset()}
+  function landed(){
+    for(const q of apples) if(!q.got&&q.r===a.row&&Math.abs(a.x-(q.c*T+T/2))<T*.6){q.got=1; api.add(5); ding(); burst(a.x,cy(a.row),'#ff6b5b')}
+    if(a.row<best){best=a.row; api.add(2)}
+    if(a.row===0){
+      saves++; api.add(50); fanfare(); burst(a.x,cy(0),'#ffc93c'); msg=saves<need?'Selamat! Bantu seekor lagi.':'Semua selamat!'; msgT=1.4;
+      if(saves>=need){done=true; api.add(Math.ceil(time)); api.end(true,lives)} else {best=10; reset()}
+    }
+  }
+  function step(dt){
+    if(a.hop>0){a.hop+=dt/.14; if(a.hop>=1){a.hop=0; a.x=a.tx; a.row=a.nr; landed()}}
+    if(done) return;
+    if(!a.hop){
+      const ln=lanes[a.row];
+      if(ln.type==='river'){
+        const log=ln.objs.find(o=>a.x>=o.x-4&&a.x<=o.x+o.w+4);
+        if(log){a.x+=ln.sp*dt; if(a.x<4||a.x>W-4) die('Alamak, hanyut!')} else die('Plup! Jatuh dalam sungai.');
+      }else if(ln.type==='road'&&ln.objs.some(o=>a.x>o.x-4&&a.x<o.x+o.w+4)) die('Hati-hati, ada kereta!');
+    }
+    time-=dt; if(time<=0&&!done){time=0; done=true; api.end(false,0)}
+  }
+  function drawTurtle(px,py,s,dir){
+    const ang={u:0,r:Math.PI/2,d:Math.PI,l:-Math.PI/2}[dir];
+    x.save(); x.translate(px,py); x.rotate(ang); x.scale(s,s);
+    x.fillStyle='#4caf50'; for(const [lx,ly] of [[-11,-8],[11,-8],[-11,9],[11,9]]){x.beginPath(); x.arc(lx,ly,4.5,0,7); x.fill()}
+    x.fillStyle='#66c46a'; x.beginPath(); x.arc(0,-16,6.5,0,7); x.fill();
+    x.fillStyle='#1c2848'; x.beginPath(); x.arc(-2.5,-18,1.5,0,7); x.arc(2.5,-18,1.5,0,7); x.fill();
+    x.fillStyle='#2f8a43'; x.beginPath(); x.ellipse(0,0,12,14,0,0,7); x.fill();
+    x.fillStyle='#46ad5a'; x.beginPath(); x.ellipse(0,0,7,9,0,0,7); x.fill();
+    x.restore();
+  }
+  function draw(t){
+    lanes.forEach((ln,r)=>{
+      const y=r*T;
+      if(ln.type==='grass'){x.fillStyle=r%2?'#8fdc8a':'#84d47f'; x.fillRect(0,y,W,T)}
+      else if(ln.type==='road'){x.fillStyle='#5d6472'; x.fillRect(0,y,W,T);
+        if(lanes[r-1]&&lanes[r-1].type==='road'){x.strokeStyle='#e5e7eb'; x.lineWidth=2; x.setLineDash([14,12]); x.beginPath(); x.moveTo(0,y); x.lineTo(W,y); x.stroke(); x.setLineDash([])}}
+      else{x.fillStyle='#4aa8e8'; x.fillRect(0,y,W,T); x.strokeStyle='rgba(255,255,255,.45)'; x.lineWidth=2;
+        for(let i=0;i<6;i++){const wx=((i*70+t*25*(r%2?1:-1))%(W+40)+W+40)%(W+40)-20; x.beginPath(); x.arc(wx,y+T/2+(i%2?6:-6),6,Math.PI*1.1,Math.PI*1.9); x.stroke()}}
+    });
+    for(let c=0;c<C;c+=2){x.fillStyle=c%4?'#ffd23f':'#ff8fb1'; x.beginPath(); x.arc(c*T+T/2,T/2,5,0,7); x.fill()}
+    x.fillStyle='#1c2848'; x.font='800 13px "Baloo 2",sans-serif'; x.textAlign='center'; x.fillText('SEBERANG',W/2,T/2+5);
+    lanes.forEach((ln,r)=>{const y=r*T; for(const o of ln.objs){
+      if(ln.type==='river'){x.fillStyle='#a86b3c'; rr(x,o.x,y+7,o.w,T-14,10); x.fill(); x.strokeStyle='#7d4a24'; x.lineWidth=2; for(let k=o.x+16;k<o.x+o.w-8;k+=22){x.beginPath(); x.arc(k,y+T/2,4,0,7); x.stroke()}}
+      else{const fwd=ln.sp>0; x.fillStyle='#222'; x.fillRect(o.x+6,y+5,8,4); x.fillRect(o.x+o.w-14,y+5,8,4); x.fillRect(o.x+6,y+T-9,8,4); x.fillRect(o.x+o.w-14,y+T-9,8,4);
+        x.fillStyle=o.c; rr(x,o.x,y+8,o.w,T-16,8); x.fill(); x.fillStyle='#d6ecff'; x.fillRect(fwd?o.x+o.w-14:o.x+6,y+12,8,T-24)}
+    }});
+    for(const q of apples) if(!q.got){const ax=q.c*T+T/2, ay=cy(q.r)+Math.sin(t*4+q.c)*2; x.fillStyle='#e53935'; x.beginPath(); x.arc(ax,ay,8,0,7); x.fill(); x.fillStyle='#43a047'; x.beginPath(); x.ellipse(ax+4,ay-9,4,2,-.5,0,7); x.fill()}
+    let px=a.x, py=cy(a.row), s=1;
+    if(a.hop>0){const h=Math.min(1,a.hop); px=a.fx+(a.tx-a.fx)*h; py=a.fy+(cy(a.nr)-a.fy)*h; s=1+Math.sin(h*Math.PI)*.35}
+    x.fillStyle='rgba(0,0,0,.18)'; x.beginPath(); x.ellipse(px,py+12,11,4,0,0,7); x.fill();
+    if(!done||lives>0) drawTurtle(px,py-(s-1)*20,s,a.dir);
+    for(const q of parts){x.globalAlpha=Math.max(0,q.life/.7); x.fillStyle=q.c; x.beginPath(); x.arc(q.x,q.y,3,0,7); x.fill()} x.globalAlpha=1;
+    if(flash>0){x.fillStyle=`rgba(255,107,91,${flash*.6})`; x.fillRect(0,0,W,H)}
+    if(msgT>0){x.fillStyle='rgba(28,40,72,.8)'; rr(x,40,H/2-22,W-80,40,12); x.fill(); x.fillStyle='#fff'; x.font='800 16px "Baloo 2",sans-serif'; x.fillText(msg,W/2,H/2+4)}
+  }
+  return loop((dt,t)=>{
+    lanes.forEach(ln=>{for(const o of ln.objs){o.x+=ln.sp*dt; if(ln.sp>0&&o.x>W) o.x-=LT; if(ln.sp<0&&o.x+o.w<0) o.x+=LT}});
+    step(dt);
+    flash=Math.max(0,flash-dt); msgT=Math.max(0,msgT-dt);
+    for(const q of parts){q.x+=q.vx*dt; q.y+=q.vy*dt; q.vy+=300*dt; q.life-=dt}
+    for(let i=parts.length-1;i>=0;i--) if(parts[i].life<=0) parts.splice(i,1);
+    api.info(`Nyawa ${hearts(Math.max(0,lives))} · Masa ${Math.ceil(time)} · Selamat ${saves}/${need}`);
+    draw(t);
+  });
+}
+
+/* ---------- game 5: Bina Bandar Impian ---------- */
+function gameBandar(area,L,api){
+  const goal=CITY_GOALS[L-1], n=cityGrid(L), earn=cityCoins(L), tier=mathTier(L), tm=timers(), have={};
+  Object.keys(goal).forEach(k=>have[k]=0);
+  let coins=0, right=0, wrong=0, lock=false, done=false, q;
+  area.innerHTML=`<div class="city">
+    <div class="goal"></div>
+    <div class="land"><span class="cloud"></span><span class="cloud c2"></span>
+      <div class="plots" style="--n:${n}">${'<div class="plot"></div>'.repeat(n*n)}</div>
+      <div class="street"><span class="car">🚗</span><span class="car c2">🚌</span></div></div>
+    <div class="cq card"><div class="label">Jawab untuk dapat ${earn} syiling</div><div class="cq-q"></div><div class="opts3"></div><p class="fb" aria-live="polite"></p></div>
+    <div><div class="label">Kedai bangunan</div><div class="shop"></div></div></div>`;
+  const goalEl=area.querySelector('.goal'), cq=area.querySelector('.cq-q'), co=area.querySelector('.opts3'), fb=area.querySelector('.fb'),
+        shop=area.querySelector('.shop'), plots=[...area.querySelectorAll('.plot')], card=area.querySelector('.cq');
+  const info=()=>api.info(`Syiling ${coins} · Betul ${right}`);
+  const renderGoal=()=>goalEl.innerHTML=Object.keys(goal).map(k=>`<span class="chip ${have[k]>=goal[k]?'ok':''}">${BUILD[k].e} ${BUILD[k].n} ${have[k]}/${goal[k]}</span>`).join('');
+  const renderShop=()=>shop.innerHTML=Object.keys(goal).map(k=>{const b=BUILD[k], full=have[k]>=goal[k];
+    return `<button class="buy" type="button" data-k="${k}" ${full?'disabled':''}><span class="be">${b.e}</span><span>${b.n}</span><small>${full?'Cukup':b.c+' syiling'}</small></button>`}).join('');
+  function ask(){
+    const m=mathQ(tier); q={a:m.a,opts:shuffle([m.a,...m.opts.filter(v=>v!==m.a).slice(0,2)])}; lock=false;
+    cq.textContent=m.q+' = ?';
+    co.innerHTML=q.opts.map((v,k)=>`<button class="opt" type="button" data-v="${v}"><span class="k">${k+1}</span>${v}</button>`).join('');
+  }
+  function answer(btn){
+    if(lock||done) return; lock=true;
+    const good=+btn.dataset.v===q.a;
+    co.querySelectorAll('.opt').forEach(b=>{b.disabled=true; if(+b.dataset.v===q.a) b.classList.add('right')});
+    if(good){coins+=earn; right++; api.add(10); ding(); fb.textContent='Betul! Dapat syiling.'; fb.className='fb good';
+      const f=document.createElement('span'); f.className='coinfly'; f.textContent=`+${earn} 🪙`; card.append(f); tm.after(()=>f.remove(),1000)}
+    else{wrong++; api.add(-3); btn.classList.add('wrong'); buzz(); fb.textContent='Jawapannya: '+q.a; fb.className='fb bad'}
+    info(); tm.after(ask,good?650:1300);
+  }
+  function buy(k){
+    if(done||have[k]>=goal[k]) return;
+    const b=BUILD[k];
+    if(coins<b.c){fb.textContent=`Syiling tak cukup untuk ${b.n}. Jawab soalan lagi!`; fb.className='fb bad'; buzz(); return}
+    coins-=b.c; have[k]++;
+    const spot=pick(plots.filter(p=>!p.classList.contains('built'))); spot.classList.add('built'); spot.innerHTML=`<span>${b.e}</span>`;
+    tone(440,.1,'square'); tone(660,.15,'square',.08); fb.textContent=`${b.n} siap dibina!`; fb.className='fb good';
+    renderGoal(); renderShop(); info();
+    if(Object.keys(goal).every(g=>have[g]>=goal[g])){done=true; api.add(30); api.end(true,wrong<=1?3:wrong<=3?2:1)}
+  }
+  co.onclick=e=>{const b=e.target.closest('.opt'); if(b) answer(b)};
+  shop.onclick=e=>{const b=e.target.closest('.buy'); if(b) buy(b.dataset.k)};
+  api.key((e,down)=>{const k='123'.indexOf(e.key); if(k<0) return false; if(down){const b=co.querySelectorAll('.opt')[k]; if(b) answer(b)} return true});
+  renderGoal(); renderShop(); info(); ask();
+  return tm.clear;
+}
+
+const GAMES=[
+  {id:'bintang',name:'Misi Kutip Bintang',icon:'⭐',gc:'#ffd76a',desc:'Kutip semua bintang dan elak raksasa ungu.',
+   how:'Gerak dengan anak panah (atau W A S D) atau tekan butang ungu. Kutip semua bintang sebelum masa habis. Raksasa ambil nyawa kamu.',start:gameBintang},
+  {id:'emoji',name:'Teka Teka Emoji',icon:'🤔',gc:'#ffb3a8',desc:'Teka perkataan daripada gabungan emoji.',
+   how:'Pilih jawapan sebelum masa habis. Betul 2 daripada 3 untuk lulus. Jawab cepat dapat markah lebih.',start:gameEmoji},
+  {id:'bs',name:'Kuiz Pantas: Betul atau Salah',icon:'⚡',gc:'#c3b9ff',desc:'Sains dan matematik. Jawab sebelum masa tamat.',
+   how:'Tekan Betul atau Salah (kekunci 1 dan 2). Betul 4 daripada 6 untuk lulus. Betul berturut-turut dapat markah tambahan.',start:gameBS},
+  {id:'haiwan',name:'Lari Selamatkan Haiwan',icon:'🐢',gc:'#9fe0b4',desc:'Bantu penyu melintas jalan dan sungai.',
+   how:'Tekan anak panah untuk melompat. Elak kereta dan naik atas kayu balak di sungai. Kutip epal untuk markah tambahan.',start:gameHaiwan},
+  {id:'bandar',name:'Bina Bandar Impian',icon:'🏙️',gc:'#a9dcff',desc:'Jawab soalan, kumpul syiling, bina bandar.',
+   how:'Setiap jawapan betul beri syiling. Beli bangunan sampai cukup sasaran. Salah jawab tolak 3 markah.',start:gameBandar}
+];
+
+/* ---------- screens ---------- */
+const SCREENS=['name','menu','levels','play','board'];
+let backFromBoard='menu';
+function show(id){
+  SCREENS.forEach(s=>$('#s-'+s).hidden=s!==id);
+  $('#who').hidden=id==='name';
+  if(player) $('#who-name').textContent=player;
+  window.scrollTo(0,0);
+}
+function renderNameScreen(){
+  const names=Object.keys(db.players);
+  $('#known-wrap').hidden=!names.length;
+  $('#known').innerHTML=names.map(n=>`<button class="mini" type="button" data-n="${esc(n)}">${esc(n)}</button>`).join('');
+  $('#name-in').value=''; $('#name-err').textContent='';
+  show('name');
+}
+$('#known').onclick=e=>{const b=e.target.closest('[data-n]'); if(b) login(b.dataset.n)};
+$('#name-form').addEventListener('submit',e=>{
+  e.preventDefault();
+  const v=$('#name-in').value.trim().replace(/\s+/g,' ');
+  const err=$('#name-err');
+  if(!v){err.textContent='Tulis nama kamu dulu.'; $('#name-in').focus(); return}
+  if(v.length<2){err.textContent='Nama perlu sekurang-kurangnya 2 huruf.'; return}
+  if(!/^[\p{L}\p{N} '-]+$/u.test(v)){err.textContent='Guna huruf dan nombor sahaja.'; return}
+  login(v);
+});
+$('#name-in').addEventListener('input',()=>$('#name-err').textContent='');
+function login(name){
+  player=name; db.players[name]=db.players[name]||{}; db.last=name; save(); renderMenu();
+}
+function renderMenu(){
+  const total=GAMES.reduce((s,g)=>s+gameTotal(player,g.id),0);
+  $('#menu-hi').textContent=`Hai, ${player}!`;
+  $('#menu-total').textContent=total?`Jumlah markah kamu: ${total}. Pilih game untuk sambung.`:'Pilih satu game untuk mula. Lulus satu level untuk buka level seterusnya.';
+  $('#games').innerHTML=GAMES.map(g=>{
+    const rec=prog(g.id), passed=rec.filter(Boolean).length;
+    return `<button class="gcard" type="button" data-g="${g.id}" style="--gc:${g.gc}">
+      <span class="gicon" aria-hidden="true">${g.icon}</span><h3>${g.name}</h3><p>${g.desc}</p>
+      <div class="meter"><i style="width:${passed*10}%"></i></div>
+      <div class="gmeta"><span>Level ${passed}/10</span><span>Markah ${gameTotal(player,g.id)}</span></div></button>`;
+  }).join('');
+  show('menu');
+}
+$('#games').onclick=e=>{const b=e.target.closest('.gcard'); if(b) renderLevels(GAMES.find(g=>g.id===b.dataset.g))};
+$('#btn-switch').onclick=renderNameScreen;
+
+let curGame=null, curL=1, cleanup=null, keyH=null;
+function renderLevels(g){
+  curGame=g; const rec=prog(g.id);
+  $('#lv-title').textContent=g.name; $('#lv-how').textContent=g.how;
+  $('#lv-sum').textContent=`Markah ${gameTotal(player,g.id)}`;
+  $('#levels').innerHTML=rec.map((r,i)=>{
+    const open=i===0||rec[i-1];
+    if(!open) return `<button class="lv locked" type="button" aria-label="Level ${i+1} berkunci" data-l="0">🔒<em>Level ${i+1}</em></button>`;
+    return `<button class="lv ${r?'done':''}" type="button" data-l="${i+1}" aria-label="Level ${i+1}${r?', markah '+r.s:''}">${i+1}<small>${r?'★'.repeat(r.st)+'☆'.repeat(3-r.st):'☆☆☆'}</small><em>${r?r.s+' mata':'Baru'}</em></button>`;
+  }).join('');
+  show('levels');
+}
+$('#levels').onclick=e=>{const b=e.target.closest('.lv'); if(b&&+b.dataset.l) runLevel(curGame,+b.dataset.l)};
+$('#lv-back').onclick=renderMenu;
+
+/* ---------- play ---------- */
+let runId=0; // bumps on every stop so a late end() from an old level is ignored
+function stopLevel(){runId++; if(cleanup){cleanup(); cleanup=null} keyH=null}
+function runLevel(g,L){
+  stopLevel(); const id=runId; curGame=g; curL=L; show('play');
+  $('#result').hidden=true; $('#hud-level').textContent=`${g.icon} Level ${L}`;
+  const area=$('#area'); area.innerHTML='';
+  const infoEl=$('#hud-info'); let over=false;
+  const api={score:0,
+    add(n){api.score=Math.max(0,api.score+n); $('#hud-score').textContent='Markah '+api.score},
+    info(t){if(infoEl.textContent!==t) infoEl.textContent=t},
+    key(fn){keyH=fn},
+    end(passed,stars){if(over) return; over=true; keyH=null; setTimeout(()=>{if(id!==runId) return; stopLevel(); result(g,L,api.score,passed,stars)},600)}
+  };
+  api.add(0); api.info('');
+  cleanup=g.start(area,L,api)||null;
+}
+document.addEventListener('keydown',e=>{if(keyH&&!$('#s-play').hidden&&keyH(e,true)) e.preventDefault()});
+document.addEventListener('keyup',e=>{if(keyH) keyH(e,false)});
+$('#quit').onclick=()=>{stopLevel(); renderLevels(curGame)};
+
+function result(g,L,score,passed,stars){
+  const rec=prog(g.id), old=rec[L-1];
+  stars=passed?Math.max(1,Math.min(3,stars)):0;
+  if(passed){
+    if(!old||score>old.s) rec[L-1]={s:score,st:Math.max(stars,old?old.st:0)};
+    else if(stars>old.st) old.st=stars;
+    save(); fanfare(); confetti(); setTimeout(()=>say('Yeahh! You win!',1.5),500);
+  } else {buzz(); setTimeout(()=>say('Sorry, try again.',1.2),400)}
+  $('#r-title').textContent=passed?(L===10?'Tahniah! Semua level tamat!':`Level ${L} lulus!`):'Hampir berjaya!';
+  $('#r-stars').innerHTML=[0,1,2].map(i=>`<span class="${i<stars?'':'off'}">★</span>`).join('');
+  $('#r-stars').setAttribute('aria-label',`${stars} bintang`);
+  $('#r-score').textContent=`${score} markah`;
+  $('#r-note').textContent=passed
+    ?(old&&score<=old.s?`Rekod kamu untuk level ini: ${old.s} markah.`:(old?'Rekod baru untuk level ini!':'Markah disimpan.'))
+    :'Cuba lagi, kamu boleh! Lulus level ini untuk buka level seterusnya.';
+  $('#r-next').hidden=!(passed&&L<10);
+  $('#result').hidden=false;
+  ($('#r-next').hidden?$('#r-retry'):$('#r-next')).focus();
+}
+$('#r-next').onclick=()=>runLevel(curGame,curL+1);
+$('#r-retry').onclick=()=>runLevel(curGame,curL);
+$('#r-levels').onclick=()=>renderLevels(curGame);
+
+function confetti(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const c=$('#fx'), r=c.getBoundingClientRect(); c.width=r.width; c.height=r.height;
+  const g=c.getContext('2d'), cols=['#ffc93c','#ff6b5b','#2fae66','#6c5ce7','#2d9cdb'];
+  const ps=Array.from({length:90},()=>({x:r.width/2,y:r.height*.4,vx:(Math.random()-.5)*620,vy:-Math.random()*520-150,c:pick(cols),s:rnd(6,10),a:Math.random()*6}));
+  const t0=performance.now();
+  (function f(t){
+    g.clearRect(0,0,c.width,c.height);
+    for(const p of ps){p.vy+=15; p.x+=p.vx/60; p.y+=p.vy/60; p.a+=.2; g.save(); g.translate(p.x,p.y); g.rotate(p.a); g.fillStyle=p.c; g.fillRect(-p.s/2,-p.s/4,p.s,p.s/2); g.restore()}
+    if(t-t0<1800) requestAnimationFrame(f); else g.clearRect(0,0,c.width,c.height);
+  })(t0);
+}
+
+/* ---------- scoreboard ---------- */
+$('#btn-board').onclick=()=>{
+  backFromBoard=SCREENS.find(s=>!$('#s-'+s).hidden)||'menu';
+  if(backFromBoard==='play'){stopLevel(); backFromBoard='levels'}
+  $('#bd-head').innerHTML=`<tr><th>#</th><th>Nama</th>${GAMES.map(g=>`<th title="${g.name}">${g.icon}</th>`).join('')}<th>Jumlah</th></tr>`;
+  const rows=Object.keys(db.players).map(n=>{const per=GAMES.map(g=>gameTotal(n,g.id)); return {n,per,total:per.reduce((a,b)=>a+b,0)}}).sort((a,b)=>b.total-a.total);
+  $('#bd-body').innerHTML=rows.length?rows.map((r,i)=>`<tr class="${r.n===player?'me':''}"><td>${i+1}</td><td>${esc(r.n)}</td>${r.per.map(v=>`<td>${v}</td>`).join('')}<td class="total">${r.total}</td></tr>`).join('')
+    :`<tr><td colspan="8">Belum ada markah. Main satu level untuk masuk papan markah.</td></tr>`;
+  show('board');
+};
+$('#bd-back').onclick=()=>{ if(backFromBoard==='levels'&&curGame) renderLevels(curGame); else if(backFromBoard==='name') renderNameScreen(); else renderMenu() };
+
+renderMute();
+if(db.last&&db.players[db.last]){ renderNameScreen(); $('#name-in').value=db.last } else renderNameScreen();
+</script>
+</body>
+</html>
